@@ -56,7 +56,7 @@ app.get('/:protocol//:host', function(req,res){
         });
     } else {
         
-        res.send('url invalid');
+        res.json(error:'url invalid');
     }
     
 });
@@ -70,7 +70,7 @@ app.get('/:code',function(req,res){
            } else if(data) {
                res.redirect(data.url);
            } else {
-               res.send("url invalid");
+               res.json(error:"url invalid");
            }
     }); 
 });
