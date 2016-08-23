@@ -33,46 +33,55 @@ app.get('/', function(req,res){
 });
 
 app.get('/:protocol//:host', function(req,res){
-    var url=req.path.split('').splice(1,req.path.length-1).join('');
-  
-    if (validUrl.isUri(url)){
-        console.log('Looks like an URL');
-        smallUrl.findOne({url:url}, function(err, data){
-          if(err){
-              res.send(err);
-              return;
-          } else if(data){
-              res.json(data);
-          } else {
-              var link = new smallUrl();
-              link.url = url;
-              link.short_url = links;
-              links++;
-              link.save(function(err){
-                  if(err) console.log(err);
-                res.json({url:link.url, short_url:link.short_url});
-              });
-          }
-        });
+    console.log('full url');
+    if(/https?:/.test(req.params.protocol)){
+        console.log('protocol works');
+        var url=req.path.split('').splice(1,req.path.length-1).join('');
+        console.log(url);
+      
+        if (validUrl.isUri(url)){
+            console.log('Looks like an URL');
+            smallUrl.findOne({url:url}, function(err, data){
+              if(err){
+                  res.send(err);
+                  return;
+              } else if(data){
+                  res.json({url:data.url, short_url:data.short_url});
+              } else {
+                  var link = new smallUrl();
+                  link.url = url;
+                  link.short_url = links;
+                  links++;
+                  link.save(function(err){
+                      if(err) console.log(err);
+                    res.json({url:link.url, short_url:link.short_url});
+                  });
+              }
+            });
+        } else {
+            
+            res.json({error:'url invalid'});
+        }
     } else {
-        
-        res.json({error:'url invalid'});
+        res.json({error:'protocol invalid'});
     }
+    
     
 });
 
 app.get('/:code',function(req,res){
+    console.log('short url');
     var url = req.params.code;
-   smallUrl.findOne({short_url:url}, function(err, data){
-           if(err){
-               console.log(err);
-                res.send(err);   
-           } else if(data) {
-               res.redirect(data.url);
-           } else {
-               res.json({error:"url invalid"});
-           }
-    }); 
+       smallUrl.findOne({short_url:url}, function(err, data){
+               if(err){
+                   console.log(err);
+                    res.send(err);   
+               } else if(data) {
+                   res.redirect(data.url);
+               } else {
+                   res.json({error:"url invalid"});
+               }
+        }); 
 });
 
 var port = process.env.PORT || 8080;
